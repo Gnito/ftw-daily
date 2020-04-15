@@ -11,8 +11,11 @@ import { parse, stringify } from '../../util/urlHelpers';
 import config from '../../config';
 import { ModalInMobile, Button } from '../../components';
 import { BookingDatesForm } from '../../forms';
+import { types as sdkTypes } from '../../util/sdkLoader';
 
 import css from './BookingPanel.css';
+
+const { Money } = sdkTypes;
 
 // This defines when ModalInMobile shows content as Modal
 const MODAL_BREAKPOINT = 1023;
@@ -67,6 +70,13 @@ const BookingPanel = props => {
     intl,
   } = props;
 
+  const cleaningFeeData = listing.attributes.publicData ? listing.attributes.publicData.cleaningFee : null;
+  const { amount: cleaningAmount, currency: cleaningCurrency } =
+    cleaningFeeData || {};
+  const cleaningFee =
+    cleaningAmount && cleaningCurrency
+      ? new Money(cleaningAmount, cleaningCurrency)
+      : null;
   const price = listing.attributes.price;
   const hasListingState = !!listing.attributes.state;
   const isClosed = hasListingState && listing.attributes.state === LISTING_STATE_CLOSED;
@@ -90,6 +100,18 @@ const BookingPanel = props => {
     ? 'BookingPanel.perDay'
     : 'BookingPanel.perUnit';
 
+  const handleSubmit = values => {
+    const selectedCleaningFee =
+      values &&
+      values.additionalItems &&
+      values.additionalItems[0] === 'cleaningFee'
+        ? cleaningFee
+        : null;
+    onSubmit({
+      ...values,
+      cleaningFee: selectedCleaningFee,
+    });
+  };
   const classes = classNames(rootClassName || css.root, className);
   const titleClasses = classNames(titleClassName || css.bookingTitle);
 
@@ -120,11 +142,12 @@ const BookingPanel = props => {
             formId="BookingPanel"
             submitButtonWrapperClassName={css.bookingDatesSubmitButtonWrapper}
             unitType={unitType}
-            onSubmit={onSubmit}
+            onSubmit={handleSubmit}
             price={price}
             isOwnListing={isOwnListing}
             timeSlots={timeSlots}
             fetchTimeSlotsError={fetchTimeSlotsError}
+            cleaningFee={cleaningFee}
           />
         ) : null}
       </ModalInMobile>

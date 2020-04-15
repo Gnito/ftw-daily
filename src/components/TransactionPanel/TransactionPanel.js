@@ -39,6 +39,7 @@ import DetailCardHeadingsMaybe from './DetailCardHeadingsMaybe';
 import DetailCardImage from './DetailCardImage';
 import FeedSection from './FeedSection';
 import SaleActionButtonsMaybe from './SaleActionButtonsMaybe';
+import InvalidPriceMessageMaybe from './InvalidPriceMessageMaybe';
 import PanelHeading, {
   HEADING_ENQUIRED,
   HEADING_PAYMENT_PENDING,
@@ -370,6 +371,12 @@ export class TransactionPanelComponent extends Component {
                 showAddress={stateData.showAddress}
               />
               <BreakdownMaybe transaction={currentTransaction} transactionRole={transactionRole} />
+              <InvalidPriceMessageMaybe
+                transaction={currentTransaction}
+                listing={currentListing}
+                transactionRole={transactionRole}
+                intl={intl}
+              />
             </div>
 
             {savePaymentMethodFailed ? (
@@ -450,6 +457,12 @@ export class TransactionPanelComponent extends Component {
                 className={css.breakdownContainer}
                 transaction={currentTransaction}
                 transactionRole={transactionRole}
+              />
+              <InvalidPriceMessageMaybe
+                transaction={currentTransaction}
+                listing={currentListing}
+                transactionRole={transactionRole}
+                intl={intl}
               />
 
               {stateData.showSaleButtons ? (

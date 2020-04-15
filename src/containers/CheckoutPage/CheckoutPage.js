@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import config from '../../config';
 import routeConfiguration from '../../routeConfiguration';
 import { pathByRouteName, findRouteByRouteName } from '../../util/routes';
-import { propTypes, LINE_ITEM_NIGHT, LINE_ITEM_DAY, DATE_TYPE_DATE } from '../../util/types';
+import { propTypes, LINE_ITEM_NIGHT, LINE_ITEM_DAY, LINE_ITEM_CLEANING_FEE, DATE_TYPE_DATE } from '../../util/types';
 import {
   ensureListing,
   ensureCurrentUser,
@@ -18,7 +18,8 @@ import {
   ensureStripeCustomer,
   ensurePaymentMethodCard,
 } from '../../util/data';
-import { dateFromLocalToAPI, minutesBetween } from '../../util/dates';
+import { dateFromLocalToAPI, minutesBetween, nightsBetween, daysBetween } from '../../util/dates';
+import { types as sdkTypes } from '../../util/sdkLoader';
 import { createSlug } from '../../util/urlHelpers';
 import {
   isTransactionInitiateAmountTooLowError,
@@ -55,6 +56,8 @@ import {
 } from './CheckoutPage.duck';
 import { storeData, storedData, clearData } from './CheckoutPageSessionHelpers';
 import css from './CheckoutPage.css';
+
+const { Money } = sdkTypes;
 
 const STORAGE_KEY = 'CheckoutPage';
 
@@ -105,6 +108,7 @@ export class CheckoutPageComponent extends Component {
     this.stripe = null;
 
     this.onStripeInitialized = this.onStripeInitialized.bind(this);
+    this.customPricingParams = this.customPricingParams.bind(this);
     this.loadInitialData = this.loadInitialData.bind(this);
     this.handlePaymentIntent = this.handlePaymentIntent.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -114,6 +118,50 @@ export class CheckoutPageComponent extends Component {
     if (window) {
       this.loadInitialData();
     }
+  }
+
+  /**
+   * Constructs a request params object that can be used when creating bookings
+   * using custom pricing.
+   * @param {} params An object that contains bookingStart, bookingEnd and listing
+   * @return a params object for custom pricing bookings
+   */
+
+  customPricingParams(params) {
+    const { bookingStart, bookingEnd, listing, cleaningFee, ...rest } = params;
+    const { amount, currency } = listing.attributes.price;
+
+    const unitType = config.bookingUnitType;
+    const isNightly = unitType === LINE_ITEM_NIGHT;
+
+    const quantity = isNightly
+      ? nightsBetween(bookingStart, bookingEnd)
+      : daysBetween(bookingStart, bookingEnd);
+
+    const cleaningFeeLineItem = cleaningFee
+      ? {
+          code: LINE_ITEM_CLEANING_FEE,
+          unitPrice: cleaningFee,
+          quantity: 1,
+        }
+      : null;
+
+    const cleaningFeeLineItemMaybe = cleaningFeeLineItem ? [cleaningFeeLineItem] : [];
+
+    return {
+      listingId: listing.id,
+      bookingStart,
+      bookingEnd,
+      lineItems: [
+        ...cleaningFeeLineItemMaybe,
+        {
+          code: unitType,
+          unitPrice: new Money(amount, currency),
+          quantity,
+        },
+      ],
+      ...rest,
+    };
   }
 
   /**
@@ -180,7 +228,7 @@ export class CheckoutPageComponent extends Component {
       !isBookingCreated;
 
     if (shouldFetchSpeculatedTransaction) {
-      const listingId = pageData.listing.id;
+      //const listingId = pageData.listing.id;
       const { bookingStart, bookingEnd } = pageData.bookingDates;
 
       // Convert picked date to date that will be converted on the API as
@@ -188,14 +236,19 @@ export class CheckoutPageComponent extends Component {
       const bookingStartForAPI = dateFromLocalToAPI(bookingStart);
       const bookingEndForAPI = dateFromLocalToAPI(bookingEnd);
 
+      const cleaningFee = pageData.bookingData.cleaningFee;
+
       // Fetch speculated transaction for showing price in booking breakdown
       // NOTE: if unit type is line-item/units, quantity needs to be added.
       // The way to pass it to checkout page is through pageData.bookingData
-      fetchSpeculatedTransaction({
-        listingId,
-        bookingStart: bookingStartForAPI,
-        bookingEnd: bookingEndForAPI,
-      });
+      fetchSpeculatedTransaction(
+        this.customPricingParams({
+          listing,
+          bookingStart: bookingStartForAPI,
+          bookingEnd: bookingEndForAPI,
+          cleaningFee,
+        })
+      );
     }
 
     this.setState({ pageData: pageData || {}, dataLoaded: true });
@@ -370,12 +423,18 @@ export class CheckoutPageComponent extends Component {
         ? { setupPaymentMethodForSaving: true }
         : {};
 
-    const orderParams = {
-      listingId: pageData.listing.id,
+    const cleaningFeeLineItem = speculatedTransaction.attributes.lineItems.find(
+      item => item.code === LINE_ITEM_CLEANING_FEE
+    );
+    const cleaningFee = cleaningFeeLineItem ? cleaningFeeLineItem.unitPrice : null;
+
+    const orderParams = this.customPricingParams({
+      listing: pageData.listing,
       bookingStart: tx.booking.attributes.start,
       bookingEnd: tx.booking.attributes.end,
       ...optionalPaymentParams,
-    };
+      cleaningFee,
+    });
 
     return handlePaymentIntentCreation(orderParams);
   }

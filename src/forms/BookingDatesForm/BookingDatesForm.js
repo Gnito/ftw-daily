@@ -9,7 +9,13 @@ import { required, bookingDatesRequired, composeValidators } from '../../util/va
 import { START_DATE, END_DATE } from '../../util/dates';
 import { propTypes } from '../../util/types';
 import config from '../../config';
-import { Form, PrimaryButton, FieldDateRangeInput } from '../../components';
+import {
+  Form,
+  PrimaryButton,
+  FieldDateRangeInput,
+  FieldCheckbox,
+} from '../../components';
+import { formatMoney } from '../../util/currency';
 import EstimatedBreakdownMaybe from './EstimatedBreakdownMaybe';
 
 import css from './BookingDatesForm.css';
@@ -89,8 +95,15 @@ export class BookingDatesFormComponent extends Component {
             values,
             timeSlots,
             fetchTimeSlotsError,
+            cleaningFee,
           } = fieldRenderProps;
           const { startDate, endDate } = values && values.bookingDates ? values.bookingDates : {};
+          const selectedCleaningFee =
+            values &&
+            values.additionalItems &&
+            values.additionalItems.find(i => i === 'cleaningFee')
+              ? cleaningFee
+              : null;
 
           const bookingStartLabel = intl.formatMessage({
             id: 'BookingDatesForm.bookingStartTitle',
@@ -123,6 +136,7 @@ export class BookingDatesFormComponent extends Component {
                   // NOTE: If unitType is `line-item/units`, a new picker
                   // for the quantity should be added to the form.
                   quantity: 1,
+                  cleaningFee: selectedCleaningFee,
                 }
               : null;
           const bookingInfo = bookingData ? (
@@ -153,6 +167,9 @@ export class BookingDatesFormComponent extends Component {
           const submitButtonClasses = classNames(
             submitButtonWrapperClassName || css.submitButtonWrapper
           );
+          const cleaningFeeLabel = intl.formatMessage({
+            id: 'BookingDatesForm.cleaningFee',
+          });
 
           return (
             <Form onSubmit={handleSubmit} className={classes}>
@@ -177,6 +194,18 @@ export class BookingDatesFormComponent extends Component {
                   bookingDatesRequired(startDateErrorMessage, endDateErrorMessage)
                 )}
               />
+              {cleaningFee ? (
+                <div className={css.cleaningFee}>
+                  <FieldCheckbox
+                    className={css.cleaningFeeLabel}
+                    id={`${formId}.cleaningFee`}
+                    label={cleaningFeeLabel}
+                    name={'additionalItems'}
+                    value={'cleaningFee'}
+                  />
+                  <span className={css.cleaningFeeAmount}>{formatMoney(intl, cleaningFee)}</span>
+                </div>
+              ) : null}
               {bookingInfo}
               <p className={css.smallPrint}>
                 <FormattedMessage
