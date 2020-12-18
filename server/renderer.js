@@ -2,8 +2,22 @@ const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
 const { types } = require('sharetribe-flex-sdk');
-const { ChunkExtractor } = require('@loadable/server');
+const React = require('react');
+const { ChunkExtractor, ChunkExtractorManager } = require('@loadable/server');
 const { renderApp, nodeStats, webStats } = require('./importer');
+const { __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED } = require('@loadable/component');
+
+const { Context: LoadableContext } = __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
+
+const useChunkExtractorManager = extractor => Component => {
+  // return (
+  //   <ChunkExtractorManager extractor={extractor}>
+  //     <Component />
+  //   </ChunkExtractorManager>
+  // );
+
+  return React.createElement(ChunkExtractorManager, { extractor }, Component);
+}
 
 const buildPath = path.resolve(__dirname, '..', 'build');
 
@@ -113,7 +127,13 @@ exports.render = function(requestUrl, context, preloadedState) {
   // const webEntrypoint = webExtractor.requireEntrypoint();
   // console.log('webEntrypoint:', webEntrypoint);
 
-  const { head, body } = renderApp(requestUrl, context, preloadedState, webExtractor.collectChunks);
+  const asdf = (Comp) => {
+    // return webExtractor.collectChunks(Comp);
+    return React.createElement(LoadableContext.Provider, { value: webExtractor }, Comp);
+  };
+
+  const { head, body } = renderApp(requestUrl, context, preloadedState, asdf);
+  //const { head, body } = renderApp(requestUrl, context, preloadedState, useChunkExtractorManager(webExtractor));
   // const jsx = webExtractor.collectChunks(<App />);
   // const body = ReactDOMServer.renderToString(jsx);
 
