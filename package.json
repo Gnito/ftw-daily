@@ -7,6 +7,10 @@
     "@babel/core": "7.12.3",
     "@babel/runtime": "^7.11.2",
     "@formatjs/intl-relativetimeformat": "^4.2.1",
+    "@loadable/babel-plugin": "^5.13.2",
+    "@loadable/component": "^5.14.1",
+    "@loadable/server": "^5.14.0",
+    "@loadable/webpack-plugin": "^5.14.0",
     "@mapbox/polyline": "^1.1.1",
     "@pmmmwh/react-refresh-webpack-plugin": "0.4.2",
     "@sentry/browser": "5.20.1",
@@ -117,6 +121,7 @@
     "webpack": "4.44.2",
     "webpack-dev-server": "3.11.0",
     "webpack-manifest-plugin": "2.2.0",
+    "webpack-node-externals": "^1.7.2",
     "workbox-webpack-plugin": "5.1.4"
   },
   "devDependencies": {
@@ -142,24 +147,25 @@
     }
   },
   "scripts": {
-    "audit": "yarn audit --json | node scripts/audit.js",
+    "audit": "yarn audit --json | node commands/audit.js",
     "clean": "rm -rf build/*",
     "config": "node scripts/config.js",
-    "config-check": "node scripts/config.js --check",
+    "config-check": "node commands/config.js --check",
     "dev-frontend": "node scripts/start.js",
     "dev-backend": "nodemon server/apiServer.js",
     "dev": "yarn run config-check&&export NODE_ENV=development REACT_APP_DEV_API_SERVER_PORT=3500&&concurrently --kill-others \"yarn run dev-frontend\" \"yarn run dev-backend\"",
     "build": "node scripts/build.js",
+    "build-server": "node scripts/build-server.js",
     "format": "prettier --write '**/*.{js,css}'",
     "format-ci": "prettier --list-different '**/*.{js,css}'",
     "format-docs": "prettier --write '**/*.md'",
     "test": "NODE_ICU_DATA=node_modules/full-icu node scripts/test.js",
     "test-ci": "yarn run test-server --runInBand && node scripts/test.js --runInBand",
     "start": "node --icu-data-dir=node_modules/full-icu server/index.js",
-    "dev-server": "export NODE_ENV=development PORT=4000 REACT_APP_CANONICAL_ROOT_URL=http://localhost:4000&&yarn run build&&nodemon --watch server server/index.js",
+    "dev-server": "export NODE_ENV=test PORT=4000 REACT_APP_CANONICAL_ROOT_URL=http://localhost:4000&&yarn run build&&yarn run build-server&&nodemon --watch server server/index.js",
     "test-server": "jest ./server/**/*.test.js",
     "heroku-postbuild": "yarn run build",
-    "translate": "node scripts/translations.js"
+    "translate": "node commands/translations.js"
   },
   "browserslist": {
     "production": [

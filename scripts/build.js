@@ -48,7 +48,7 @@ const argv = process.argv.slice(2);
 const writeStatsJson = argv.indexOf('--stats') !== -1;
 
 // Generate configuration
-const config = configFactory('production');
+const config = configFactory('production', 'web');
 
 // We require that you explicitly set browsers and do not fall back to
 // browserslist defaults.
@@ -66,7 +66,7 @@ checkBrowsers(paths.appPath, isInteractive)
     // Merge with the public folder
     copyPublicFolder();
     // Start the webpack build
-    return build(previousFileSizes);
+    return build(previousFileSizes, config);
   })
   .then(
     ({ stats, previousFileSizes, warnings }) => {
@@ -133,7 +133,7 @@ checkBrowsers(paths.appPath, isInteractive)
   });
 
 // Create the production build and print the deployment instructions.
-function build(previousFileSizes) {
+function build(previousFileSizes, config) {
   console.log('Creating an optimized production build...');
 
   const compiler = webpack(config);

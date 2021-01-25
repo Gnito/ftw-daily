@@ -19,111 +19,104 @@ import 'raf/polyfill';
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createInstance, types as sdkTypes } from './util/sdkLoader';
-import { ClientApp, renderApp } from './app';
-import configureStore from './store';
-import { matchPathname } from './util/routes';
-import * as sample from './util/sample';
-import * as apiUtils from './util/api';
-import config from './config';
-import { authInfo } from './ducks/Auth.duck';
-import { fetchCurrentUser } from './ducks/user.duck';
-import routeConfiguration from './routeConfiguration';
-import * as log from './util/log';
-import { LoggingAnalyticsHandler, GoogleAnalyticsHandler } from './analytics/handlers';
+import { loadableReady } from '@loadable/component';
+// import { createInstance, types as sdkTypes } from './util/sdkLoader';
+// import { ClientApp, renderApp } from './app';
+// import configureStore from './store';
+// import { matchPathname } from './util/routes';
+// import * as sample from './util/sample';
+// import * as apiUtils from './util/api';
+// import config from './config';
+// import { authInfo } from './ducks/Auth.duck';
+// import { fetchCurrentUser } from './ducks/user.duck';
+// import routeConfiguration from './routeConfiguration';
+// import * as log from './util/log';
+// import { LoggingAnalyticsHandler, GoogleAnalyticsHandler } from './analytics/handlers';
 
-import './styles/marketplaceDefaults.css';
+// import './styles/marketplaceDefaults.css';
 
-const render = (store, shouldHydrate) => {
-  // If the server already loaded the auth information, render the app
-  // immediately. Otherwise wait for the flag to be loaded and render
-  // when auth information is present.
-  const authInfoLoaded = store.getState().Auth.authInfoLoaded;
-  const info = authInfoLoaded ? Promise.resolve({}) : store.dispatch(authInfo());
-  info
-    .then(() => {
-      store.dispatch(fetchCurrentUser());
-      if (shouldHydrate) {
-        ReactDOM.hydrate(<ClientApp store={store} />, document.getElementById('root'));
-      } else {
-        ReactDOM.render(<ClientApp store={store} />, document.getElementById('root'));
-      }
-    })
-    .catch(e => {
-      log.error(e, 'browser-side-render-failed');
-    });
-};
+// const render = (store, shouldHydrate) => {
+//   // If the server already loaded the auth information, render the app
+//   // immediately. Otherwise wait for the flag to be loaded and render
+//   // when auth information is present.
+//   const authInfoLoaded = store.getState().Auth.authInfoLoaded;
+//   const info = authInfoLoaded ? Promise.resolve({}) : store.dispatch(authInfo());
+//   info
+//     .then(() => {
+//       store.dispatch(fetchCurrentUser());
+//       const asdf = loadableReady();
+//       //console.log('asdf', asdf);
+//       debugger;
+//       return asdf;
+//     })
+//     .then((asdf) => {
+//       console.log('asdf', asdf);
+//       if (shouldHydrate) {
+//         ReactDOM.hydrate(<ClientApp store={store} />, document.getElementById('root'));
+//       } else {
+//         ReactDOM.render(<ClientApp store={store} />, document.getElementById('root'));
+//       }
+//     })
+//     .catch(e => {
+//       log.error(e, 'browser-side-render-failed');
+//     });
+// };
 
-const setupAnalyticsHandlers = () => {
-  let handlers = [];
+// const setupAnalyticsHandlers = () => {
+//   let handlers = [];
 
-  // Log analytics page views and events in dev mode
-  if (config.dev) {
-    handlers.push(new LoggingAnalyticsHandler());
-  }
+//   // Log analytics page views and events in dev mode
+//   if (config.dev) {
+//     handlers.push(new LoggingAnalyticsHandler());
+//   }
 
-  // Add Google Analytics handler if tracker ID is found
-  if (process.env.REACT_APP_GOOGLE_ANALYTICS_ID) {
-    handlers.push(new GoogleAnalyticsHandler(window.ga));
-  }
+//   // Add Google Analytics handler if tracker ID is found
+//   if (process.env.REACT_APP_GOOGLE_ANALYTICS_ID) {
+//     handlers.push(new GoogleAnalyticsHandler(window.ga));
+//   }
 
-  return handlers;
-};
+//   return handlers;
+// };
 
-// If we're in a browser already, render the client application.
-if (typeof window !== 'undefined') {
-  // set up logger with Sentry DSN client key and environment
-  log.setup();
+// // If we're in a browser already, render the client application.
+// if (typeof window !== 'undefined') {
+//   // set up logger with Sentry DSN client key and environment
+//   log.setup();
 
-  const baseUrl = config.sdk.baseUrl ? { baseUrl: config.sdk.baseUrl } : {};
+//   const baseUrl = config.sdk.baseUrl ? { baseUrl: config.sdk.baseUrl } : {};
 
-  // eslint-disable-next-line no-underscore-dangle
-  const preloadedState = window.__PRELOADED_STATE__ || '{}';
-  const initialState = JSON.parse(preloadedState, sdkTypes.reviver);
-  const sdk = createInstance({
-    transitVerbose: config.sdk.transitVerbose,
-    clientId: config.sdk.clientId,
-    secure: config.usingSSL,
-    typeHandlers: apiUtils.typeHandlers,
-    ...baseUrl,
-  });
-  const analyticsHandlers = setupAnalyticsHandlers();
-  const store = configureStore(initialState, sdk, analyticsHandlers);
+//   // eslint-disable-next-line no-underscore-dangle
+//   const preloadedState = window.__PRELOADED_STATE__ || '{}';
+//   const initialState = JSON.parse(preloadedState, sdkTypes.reviver);
+//   const sdk = createInstance({
+//     transitVerbose: config.sdk.transitVerbose,
+//     clientId: config.sdk.clientId,
+//     secure: config.usingSSL,
+//     typeHandlers: apiUtils.typeHandlers,
+//     ...baseUrl,
+//   });
+//   const analyticsHandlers = setupAnalyticsHandlers();
+//   const store = configureStore(initialState, sdk, analyticsHandlers);
 
-  require('./util/polyfills');
-  render(store, !!window.__PRELOADED_STATE__);
+//   require('./util/polyfills');
+//   render(store, !!window.__PRELOADED_STATE__);
 
-  if (config.dev) {
-    // Expose stuff for the browser REPL
-    window.app = {
-      config,
-      sdk,
-      sdkTypes,
-      store,
-      sample,
-      routeConfiguration: routeConfiguration(),
-    };
-  }
-}
+//   if (config.dev) {
+//     // Expose stuff for the browser REPL
+//     window.app = {
+//       config,
+//       sdk,
+//       sdkTypes,
+//       store,
+//       sample,
+//       routeConfiguration: routeConfiguration(),
+//     };
+//   }
+// }
 
-// Show warning if CSP is not enabled
-const CSP = process.env.REACT_APP_CSP;
-const cspEnabled = CSP === 'block' || CSP === 'report';
+import { ClientApp } from './app';
 
-if (CSP === 'report' && process.env.REACT_APP_ENV === 'production') {
-  console.warn(
-    'Your production environment should use CSP with "block" mode. Read more from: https://www.sharetribe.com/docs/ftw-security/how-to-set-up-csp-for-ftw/'
-  );
-} else if (!cspEnabled) {
-  console.warn(
-    "CSP is currently not enabled! You should add an environment variable REACT_APP_CSP with the value 'report' or 'block'. Read more from: https://www.sharetribe.com/docs/ftw-security/how-to-set-up-csp-for-ftw/"
-  );
-}
-
-// Export the function for server side rendering.
-export default renderApp;
-
-// exporting matchPathname and configureStore for server side rendering.
-// matchPathname helps to figure out which route is called and if it has preloading needs
-// configureStore is used for creating initial store state for Redux after preloading
-export { matchPathname, configureStore, routeConfiguration, config };
+loadableReady(() => {
+  const root = document.getElementById('root');
+  ReactDOM.hydrate(<ClientApp />, root)
+})
