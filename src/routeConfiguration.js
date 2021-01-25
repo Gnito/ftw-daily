@@ -1,4 +1,5 @@
 import React from 'react';
+import loadable from '@loadable/component'
 import {
   AboutPage,
   AuthenticationPage,
@@ -7,7 +8,7 @@ import {
   EditListingPage,
   EmailVerificationPage,
   InboxPage,
-  LandingPage,
+  //LandingPage,
   ListingPage,
   ManageListingsPage,
   NotFoundPage,
@@ -20,7 +21,7 @@ import {
   ProfilePage,
   ProfileSettingsPage,
   SearchPage,
-  StyleguidePage,
+  //StyleguidePage,
   TermsOfServicePage,
   TransactionPage,
 } from './containers';
@@ -29,6 +30,9 @@ import {
 // Otherwise, components will import form container eventually and
 // at that point css bundling / imports will happen in wrong order.
 import { NamedRedirect } from './components';
+
+const LandingPage = loadable(() => import(/* webpackChunkName: "LandingPage" */ './containers/LandingPage/LandingPage'));
+const StyleguidePage = loadable(() => import(/* webpackChunkName: "StyleguidePage" */ './containers/StyleguidePage/StyleguidePage'));
 
 export const ACCOUNT_SETTINGS_PAGES = [
   'ContactDetailsPage',
