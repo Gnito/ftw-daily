@@ -152,7 +152,7 @@ class CustomOverlayView extends Component {
       ...getOffsetOverride(this.containerElement, this.props),
     };
     const layoutStyles = getLayoutStyles(mapCanvasProjection, offset, this.props);
-    _.assign(this.containerElement.style, layoutStyles);
+    Object.assign(this.containerElement.style, layoutStyles);
   }
 
   draw() {

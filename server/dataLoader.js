@@ -1,12 +1,13 @@
 const url = require('url');
-const { matchPathname, configureStore, routeConfiguration } = require('./importer');
+//const { matchPathname, configureStore, routeConfiguration } = require('./importer');
 const log = require('./log');
 
-exports.loadData = function(requestUrl, sdk) {
+exports.loadData = function(requestUrl, sdk, matchPathname, configureStore, routeConfiguration) {
   const { pathname, query } = url.parse(requestUrl);
   const matchedRoutes = matchPathname(pathname, routeConfiguration());
 
   const store = configureStore({}, sdk);
+  console.log('store', store);
 
   const dataLoadingCalls = matchedRoutes.reduce((calls, match) => {
     const { route, params } = match;

@@ -6,6 +6,10 @@ import ReactDOMServer from 'react-dom/server';
 // https://github.com/airbnb/react-dates#initialize
 // NOTE: Initializing it here will initialize it also for app.test.js
 import 'react-dates/initialize';
+import loadable from '@loadable/component';
+//import { __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED as LoadableSecret } from '@loadable/component';
+//const { Context: LoadableContext } = LoadableSecret;
+
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter, StaticRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
@@ -131,7 +135,7 @@ ServerApp.propTypes = { url: string.isRequired, context: any.isRequired, store: 
  *  - {String} body: Rendered application body of the given route
  *  - {Object} head: Application head metadata from react-helmet
  */
-export const renderApp = (url, serverContext, preloadedState) => {
+export const renderApp = (url, serverContext, preloadedState, collectChunks) => {
   // Don't pass an SDK instance since we're only rendering the
   // component tree with the preloaded store state and components
   // shouldn't do any SDK calls in the (server) rendering lifecycle.
@@ -139,9 +143,19 @@ export const renderApp = (url, serverContext, preloadedState) => {
 
   const helmetContext = {};
 
-  const body = ReactDOMServer.renderToString(
-    <ServerApp url={url} context={serverContext} helmetContext={helmetContext} store={store} />
+  console.log('collectChunks() HOC next', collectChunks);
+  const WithChunks = collectChunks(
+      <ServerApp url={url} context={serverContext} helmetContext={helmetContext} store={store} />
   );
+  const body = ReactDOMServer.renderToString(WithChunks);
   const { helmet: head } = helmetContext;
+  // const head = {
+  //   htmlAttributes: 'htmlAttributes',
+  //   title: 'title',
+  //   link: 'link',
+  //   meta: 'meta',
+  //   script: 'script',
+  // };
+
   return { head, body };
 };
