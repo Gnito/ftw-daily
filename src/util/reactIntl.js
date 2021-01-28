@@ -5,7 +5,7 @@ import {
   FormattedDate,
   FormattedHTMLMessage,
   injectIntl,
-} from 'react-intl';
+} from 'react-intl/dist/react-intl';
 
 const intlShape = shape({
   formatDate: func.isRequired,

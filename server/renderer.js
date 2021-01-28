@@ -2,8 +2,6 @@ const path = require('path');
 const fs = require('fs');
 const _ = require('lodash');
 const { types } = require('sharetribe-flex-sdk');
-const { ChunkExtractor } = require('@loadable/server');
-const { renderApp, nodeStats, webStats } = require('./importer');
 
 const buildPath = path.resolve(__dirname, '..', 'build');
 
@@ -92,18 +90,8 @@ const replacer = (key = null, value) => {
   return types.replacer(key, cleanedValue);
 };
 
-exports.render = function(requestUrl, context, preloadedState) {
-  const nodeExtractor = new ChunkExtractor({ statsFile: nodeStats });
-  const nodeEntrypoint = nodeExtractor.requireEntrypoint();
-  const {
-    default: renderApp,
-    matchPathname,
-    configureStore,
-    routeConfiguration,
-  } = nodeEntrypoint;
-
-  const webExtractor = new ChunkExtractor({ statsFile: webStats });
-
+exports.render = function(requestUrl, context, preloadedState, renderApp, webExtractor) {
+  
   const collectWebChunks = (Comp) => {
     return webExtractor.collectChunks(Comp);
     // const extractor = webExtractor;

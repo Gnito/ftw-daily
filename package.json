@@ -26,6 +26,7 @@
     "babel-loader": "8.1.0",
     "babel-plugin-named-asset-import": "^0.3.7",
     "babel-preset-react-app": "^10.0.0",
+    "babel-preset-env": "^1.7.0",
     "basic-auth": "^2.0.1",
     "bfj": "^7.0.2",
     "body-parser": "^1.18.3",
@@ -162,7 +163,7 @@
     "test": "NODE_ICU_DATA=node_modules/full-icu node scripts/test.js",
     "test-ci": "yarn run test-server --runInBand && node scripts/test.js --runInBand",
     "start": "node --icu-data-dir=node_modules/full-icu server/index.js",
-    "dev-server": "export NODE_ENV=test PORT=4000 REACT_APP_CANONICAL_ROOT_URL=http://localhost:4000&&yarn run build&&yarn run build-server&&nodemon --watch server server/index.js",
+    "dev-server": "export NODE_ENV=development PORT=4000 REACT_APP_CANONICAL_ROOT_URL=http://localhost:4000&&yarn run build&&yarn run build-server&&nodemon --watch server server/index.js",
     "test-server": "jest ./server/**/*.test.js",
     "heroku-postbuild": "yarn run build",
     "translate": "node commands/translations.js"
@@ -236,7 +237,8 @@
   },
   "babel": {
     "presets": [
-      "react-app"
+      "@babel/preset-react",
+      ["@babel/preset-env", {"useBuiltIns": "entry"}]
     ]
   },
   "eslintConfig": {

@@ -1,13 +1,8 @@
 import { renderApp } from './app';
-// import configureStore from './store';
-// import { matchPathname } from './util/routes';
-// import routeConfiguration from './routeConfiguration';
-// import config from './config';
-
-const configureStore = () => {};
-const matchPathname = () => {};
-const routeConfiguration = () => {};
-const config = () => {};
+import configureStore from './store';
+import { matchPathname } from './util/routes';
+import routeConfiguration from './routeConfiguration';
+import config from './config';
 
 // Show warning if CSP is not enabled
 const CSP = process.env.REACT_APP_CSP;

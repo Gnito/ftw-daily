@@ -31,6 +31,7 @@ const nodeExternals = require('webpack-node-externals');
 //const postcssNormalize = require('postcss-normalize');
 
 const sharetribeConfigUtils = require('./sharetribeWebpackConfig');
+const shouldUseReactRefresh = false; // TODO
 
 const appPackageJson = require(paths.appPackageJson);
 
@@ -225,6 +226,10 @@ module.exports = function(webpackEnv, target = 'web') {
           'react-dom$': 'react-dom/profiling',
           'scheduler/tracing': 'scheduler/tracing-profiling',
         }),
+        "react-intl": path.resolve(
+          __dirname,
+          "node_modules/react-intl/dist/react-intl.js"
+        ),
         ...(modules.webpackAliases || {}),
       },
       plugins: [
